@@ -2,6 +2,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pydeck as pdk
+import shapely
 import streamlit as st
 
 from joblib import load
@@ -15,7 +16,40 @@ def carregar_dados_limpos():
 
 @st.cache_data
 def carregar_dados_geo():
-    return gpd.read_parquet(DADOS_GEO_MEDIAN)
+    gdf_geo = gpd.read_parquet(DADOS_GEO_MEDIAN)
+
+    # Explode MultiPolygons into individual polygons
+    gdf_geo = gdf_geo.explode(ignore_index=True)
+
+    # Function to check and fix invalid geometries
+    def fix_and_orient_geometry(geometry):
+        if not geometry.is_valid:
+            geometry = geometry.buffer(0)  # Fix invalid geometry
+        # Orient the polygon to be counter-clockwise if it's a Polygon or MultiPolygon
+        if isinstance(
+            geometry, (shapely.geometry.Polygon, shapely.geometry.MultiPolygon)
+        ):
+            geometry = shapely.geometry.polygon.orient(geometry, sign=1.0)
+        return geometry
+
+    # Apply the fix and orientation function to geometries
+    gdf_geo["geometry"] = gdf_geo["geometry"].apply(fix_and_orient_geometry)
+
+    # Extract polygon coordinates
+    def get_polygon_coordinates(geometry):
+        return (
+            [[[x, y] for x, y in geometry.exterior.coords]]
+            if isinstance(geometry, shapely.geometry.Polygon)
+            else [
+                [[x, y] for x, y in polygon.exterior.coords]
+                for polygon in geometry.geoms
+            ]
+        )
+
+    # Apply the coordinate conversion and store in a new column
+    gdf_geo["geometry"] = gdf_geo["geometry"].apply(get_polygon_coordinates)
+
+    return gdf_geo
 
 @st.cache_resource
 def carregar_modelo():
@@ -29,74 +63,108 @@ modelo = carregar_modelo()
 st.title('Previsão de Preços de Imóveis')
 
 # declarando variáveis (entradas)
-condados = list(gdf_geo['name'].sort_values())
+condados = sorted(gdf_geo['name'].unique())
 
 coluna1, coluna2 = st.columns(2)
 
 with coluna1:
-    selecionar_condado = st.selectbox('Condado', condados)
+
+    with st.form(key='formulario', border=False):
     
-    longitude = gdf_geo.query('name == @selecionar_condado')['longitude'].values
-    latitude = gdf_geo.query('name == @selecionar_condado')['latitude'].values
-                              
-    housing_median_age = st.number_input('Idade do imóvel', value=10, min_value=1, max_value=50)
-    
-    total_rooms = gdf_geo.query('name == @selecionar_condado')['total_rooms'].values
-    total_bedrooms = gdf_geo.query('name == @selecionar_condado')['total_bedrooms'].values
-    population = gdf_geo.query('name == @selecionar_condado')['population'].values
-    households = gdf_geo.query('name == @selecionar_condado')['households'].values
-    
-    median_income_slider = st.slider('Renda média (milhares de US$)', min_value=5.0, max_value=100.0, value=50.0, step=5.0)
-    median_income = median_income_slider / 10
-    
-    ocean_proximity = gdf_geo.query('name == @selecionar_condado')['ocean_proximity'].values
-    
-    bins_income = [0, 1.5, 3, 4.5, 6, np.inf]
-    median_income_cat = np.digitize(x=median_income, bins=bins_income)
-    
-    rooms_per_household = gdf_geo.query('name == @selecionar_condado')['rooms_per_household'].values
-    bedrooms_per_room = gdf_geo.query('name == @selecionar_condado')['bedrooms_per_room'].values
-    population_per_household = gdf_geo.query('name == @selecionar_condado')['population_per_household'].values
-    
-    # dicionário atribuindo as variáveis
-    entrada_modelo = {
-        'longitude': longitude,
-        'latitude': latitude,
-        'housing_median_age': housing_median_age,
-        'total_rooms': longitude,
-        'total_bedrooms': total_rooms,
-        'population': population,
-        'households': households,
-        'median_income': median_income,
-        'ocean_proximity': ocean_proximity,
-        'median_income_cat': median_income_cat,
-        'rooms_per_household': rooms_per_household,
-        'bedrooms_per_room': bedrooms_per_room,
-        'population_per_household': population_per_household,
-    }
-    
-    df_entrada_modelo = pd.DataFrame(entrada_modelo, index=[0])
-    
-    # Criando o botão para previsão
-    botao_previsao = st.button('Prever preço')
+        selecionar_condado = st.selectbox('Condado', condados)
+        
+        longitude = gdf_geo.query('name == @selecionar_condado')['longitude'].values
+        latitude = gdf_geo.query('name == @selecionar_condado')['latitude'].values
+                                  
+        housing_median_age = st.number_input('Idade do imóvel', value=10, min_value=1, max_value=50)
+        
+        total_rooms = gdf_geo.query('name == @selecionar_condado')['total_rooms'].values
+        total_bedrooms = gdf_geo.query('name == @selecionar_condado')['total_bedrooms'].values
+        population = gdf_geo.query('name == @selecionar_condado')['population'].values
+        households = gdf_geo.query('name == @selecionar_condado')['households'].values
+        
+        median_income_slider = st.slider('Renda média (milhares de US$)', min_value=5.0, max_value=100.0, value=50.0, step=5.0)
+        median_income = median_income_slider / 10
+        
+        ocean_proximity = gdf_geo.query('name == @selecionar_condado')['ocean_proximity'].values
+        
+        bins_income = [0, 1.5, 3, 4.5, 6, np.inf]
+        median_income_cat = np.digitize(x=median_income, bins=bins_income)
+        
+        rooms_per_household = gdf_geo.query('name == @selecionar_condado')['rooms_per_household'].values
+        bedrooms_per_room = gdf_geo.query('name == @selecionar_condado')['bedrooms_per_room'].values
+        population_per_household = gdf_geo.query('name == @selecionar_condado')['population_per_household'].values
+        
+        # dicionário atribuindo as variáveis
+        entrada_modelo = {
+            'longitude': longitude,
+            'latitude': latitude,
+            'housing_median_age': housing_median_age,
+            'total_rooms': longitude,
+            'total_bedrooms': total_rooms,
+            'population': population,
+            'households': households,
+            'median_income': median_income,
+            'ocean_proximity': ocean_proximity,
+            'median_income_cat': median_income_cat,
+            'rooms_per_household': rooms_per_household,
+            'bedrooms_per_room': bedrooms_per_room,
+            'population_per_household': population_per_household,
+        }
+        
+        df_entrada_modelo = pd.DataFrame(entrada_modelo)
+        
+        # Criando o botão para previsão
+        botao_previsao = st.form_submit_button('Prever preço')
     
     if botao_previsao:
         preco = modelo.predict(df_entrada_modelo)
-        st.write(f'Preço previsto: US$ {preco[0][0]:.2f}')
+        st.metric(label='Preço previsto: US$', value=f'{preco[0][0]:.2f}')
 
 
 with coluna2:
     view_state = pdk.ViewState(
         latitude=float(latitude[0]),
         longitude=float(longitude[0]),
-        zoom=5,
+        zoom=6,
         min_zoom=5,
         max_zoom=15
     )
 
+    polygon_layer = pdk.Layer(
+        'PolygonLayer',
+        data=gdf_geo[['name', 'geometry']],
+        get_polygon='geometry',
+        get_fill_color=[0, 0, 255, 100],
+        get_line_color=[255, 255, 255],
+        get_line_width=50,
+        pickable=True,
+        auto_highlight=True
+    )
+
+    condado_selecionado = gdf_geo.query('name == @selecionar_condado')
+
+    highlight_layer = pdk.Layer(
+        'PolygonLayer',
+        data=condado_selecionado[['name', 'geometry']],
+        get_polygon='geometry',
+        get_fill_color=[255, 0, 0, 100],
+        get_line_color=[0, 0, 0],
+        get_line_width=500,
+        pickable=True,
+        auto_highlight=True
+    )
+
+    tooltip = {
+        'html': '<b>Condado:</b> {name}',
+        'style': {'backgroundColor': 'steelblue', 'color': 'white', 'fontsize': '10px'}
+    }
+
     mapa = pdk.Deck(
         initial_view_state=view_state,
-        map_style='light'
+        map_style='light',
+        layers=[polygon_layer, highlight_layer],
+        tooltip=tooltip
     )
 
     st.pydeck_chart(mapa)
