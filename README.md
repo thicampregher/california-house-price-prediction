@@ -1,6 +1,6 @@
 # Previsão de preços de imóveis na Califórnia
 
-Os dados dizem respeito às casas encontradas na Califórnia e algumas estatísticas resumidas sobre elas com base nos dados do censo de 1990. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices).
+Os dados dizem respeito às casas encontradas em um determinado distrito da Califórnia e algumas estatísticas resumidas sobre elas com base nos dados do censo de 1990. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices/data).
 
 ![imagem](imagens/california.jpg)
 
@@ -20,7 +20,7 @@ Construir um modelo preditivo capaz de estimar o valor mediano de imóveis com b
 
 ## Deploy
 
-Aplicação disponível via Streamlit Cloud.
+Aplicação disponível via [Streamlit Cloud](https://california-house-price-prediction-proj.streamlit.app/)
 
 ## Organização do projeto
 
