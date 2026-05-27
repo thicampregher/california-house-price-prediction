@@ -1,8 +1,26 @@
-# Predição dos valores das casas na California
+# Previsão de preços de imóveis na Califórnia
 
-Os dados dizem respeito às casas encontradas em um determinado distrito da Califórnia e algumas estatísticas resumidas sobre elas com base nos dados do censo de 1990. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices).
+Os dados dizem respeito às casas encontradas na Califórnia e algumas estatísticas resumidas sobre elas com base nos dados do censo de 1990. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices).
 
 ![imagem](imagens/california.jpg)
+
+## Tecnologias utilizadas
+
+- Python
+- Numpy
+- Pandas
+- Scikit-Learn
+- GeoPandas
+- Streamlit
+- Folium
+
+## Objetivo
+
+Construir um modelo preditivo capaz de estimar o valor mediano de imóveis com base em variáveis socioeconômicas e geográficas.
+
+## Deploy
+
+Aplicação disponível via Streamlit Cloud.
 
 ## Organização do projeto
 
@@ -13,6 +31,8 @@ Os dados dizem respeito às casas encontradas em um determinado distrito da Cali
 ├── README.md          <- README principal para desenvolvedores que usam este projeto.
 |
 ├── dados              <- Arquivos de dados para o projeto.
+|
+├── imagens            <- Imagens utilizadas no projeto.
 |
 ├── modelos            <- Modelo treinado e serializado
 |
@@ -28,7 +48,7 @@ Os dados dizem respeito às casas encontradas em um determinado distrito da Cali
 |
 ├── referencias        <- Dicionários de dados.
 |
-├── imagens            <- Imagens utilizadas no projeto.
+├── home.py            <- Aplicação principal do Streamlit
 ```
 
 ## Configuração do ambiente
