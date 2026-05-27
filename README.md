@@ -1,10 +1,8 @@
-# Análise estatística de base de dados de diabetes
+# Predição dos valores das casas na California
 
-O diabetes é uma doença crônica grave na qual os indivíduos perdem a capacidade de regular efetivamente os níveis de glicose no sangue e pode levar a uma redução na qualidade de vida e na expectativa de vida.
+Os dados dizem respeito às casas encontradas em um determinado distrito da Califórnia e algumas estatísticas resumidas sobre elas com base nos dados do censo de 1990. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/camnugent/california-housing-prices).
 
-O Sistema de Vigilância de Fatores de Risco Comportamentais (BRFSS) é uma pesquisa telefônica relacionada à saúde que é coletada anualmente pelo CDC (Centro de Controle e Prevenção de Doenças dos Estados Unidos). A cada ano, a pesquisa coleta respostas de milhares de americanos sobre comportamentos de risco relacionados à saúde, condições crônicas de saúde e o uso de serviços preventivos. Para este projeto, foi utilizado conjunto de dados disponível no [Kaggle](https://www.kaggle.com/datasets/alexteboul/diabetes-health-indicators-dataset) para o ano de 2015. 
-
-![imagem](imagens/diabetes.jpg)
+![imagem](imagens/california.jpg)
 
 ## Organização do projeto
 
@@ -16,17 +14,21 @@ O Sistema de Vigilância de Fatores de Risco Comportamentais (BRFSS) é uma pesq
 |
 ├── dados              <- Arquivos de dados para o projeto.
 |
+├── modelos            <- Modelo treinado e serializado
+|
 ├── notebooks          <- Jupyter Notebooks (.ipynb).
 │
 |   └──src             <- Código-fonte para uso neste projeto.
 |      │
 |      ├── __init__.py     <- Torna um módulo Python
 |      ├── config.py       <- Configurações básicas do projeto
-|      └── estatistica.py  <- Funções criadas especificamente para o projeto com análises estatísticas
+|      └── auxiliares.py   <- Funções auxiliares do projeto
+|      ├── graficos.py     <- Funções que geram os gráficos
+|      └── modelos.py      <- Funções criadas para a etapa de modelagem
 |
 ├── referencias        <- Dicionários de dados.
 |
-├── imagens         <- Imagens utilizadas no projeto.
+├── imagens            <- Imagens utilizadas no projeto.
 ```
 
 ## Configuração do ambiente
@@ -34,13 +36,13 @@ O Sistema de Vigilância de Fatores de Risco Comportamentais (BRFSS) é uma pesq
 1. Faça o clone do repositório.
 
     ```bash
-    git clone git@github.com:thicampregher/projeto_diabetes.git
+    git clone git@github.com:thicampregher/california-house-price-prediction.git
     ```
 
 2. Crie um ambiente virtual para o seu projeto utilizando o `conda`.
 
     ```bash
-    conda env create -f ambiente.yml --name estatistica
+    conda env create -f environment.yml --name californa-project
     ```
 
 ## Um pouco mais sobre a base
